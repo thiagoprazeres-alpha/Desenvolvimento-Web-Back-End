@@ -1,0 +1,7 @@
+target/
+*.jar
+*.class
+.dockerignore
+docker-compose.yml
+Dockerfile
+README.md

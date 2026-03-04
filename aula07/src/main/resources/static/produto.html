@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Produto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .product-image {
+            max-width: 300px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .product-info {
+            line-height: 1.6;
+        }
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-inactive { color: #dc3545; font-weight: bold; }
+        .status-em-falta { color: #fd7e14; font-weight: bold; }
+        .status-descontinuado { color: #6c757d; font-weight: bold; }
+        nav {
+            margin-bottom: 20px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+      <a href="/">← Voltar</a>
+    </nav>
+    <div id="produto">
+      <p>Carregando...</p>
+    </div>
+    <script>
+      // Obter slug do produto da URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const produtoSlug = urlParams.get("slug");
+
+      if (!produtoSlug) {
+        document.getElementById("produto").innerHTML =
+          "<p>Slug do produto não especificado</p>";
+      } else {
+        fetch(`/api/produtos/slug/${produtoSlug}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Produto não encontrado");
+            }
+            return response.json();
+          })
+          .then((produto) => {
+            console.log("Produto:", produto);
+
+            const produtoDiv = document.getElementById("produto");
+
+            // Determinar cor do status
+            let statusClass = "";
+            if (produto.status === "ATIVO") {
+              statusClass = "status-active";
+            } else if (produto.status === "INATIVO") {
+              statusClass = "status-inactive";
+            } else if (produto.status === "EM_FALTA") {
+              statusClass = "status-em-falta";
+            } else if (produto.status === "DESCONTINUADO") {
+              statusClass = "status-descontinuado";
+            }
+
+            // Imagem do produto
+            const imageHtml = produto.imageUrl 
+                ? `<img src="${produto.imageUrl}" alt="${produto.nome}" class="product-image">` 
+                : '';
+
+            produtoDiv.innerHTML = `
+                ${imageHtml}
+                <div class="product-info">
+                    <h1>${produto.nome}</h1>
+                    <p><strong>Descrição:</strong> ${produto.descricao || "Sem descrição"}</p>
+                    <p><strong>Preço:</strong> R$ ${produto.preco}</p>
+                    <p><strong>Quantidade em Estoque:</strong> ${produto.quantidadeEstoque}</p>
+                    <p><strong>Status:</strong> <span class="${statusClass}">${produto.status}</span></p>
+                    ${
+                      produto.categoria
+                        ? `
+                      <p><strong>Categoria:</strong> 
+                        <a href="categoria.html?slug=${produto.categoria.slug}">${produto.categoria.nome}</a>
+                      </p>
+                      <p><strong>Descrição da Categoria:</strong> ${produto.categoria.descricao || "Sem descrição"}</p>
+                    `
+                          : ""
+                    }
+                    <div style="margin-top: 20px;">
+                      <button onclick="history.back()">← Voltar</button>
+                    </div>
+                </div>
+            `;
+          })
+          .catch((error) => {
+            console.error("Erro ao carregar produto:", error);
+            document.getElementById("produto").innerHTML =
+              "<p>Erro ao carregar produto.</p>";
+          });
+      }
+    </script>
+  </body>
+</html>

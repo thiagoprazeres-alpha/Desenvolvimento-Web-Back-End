@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CRUD Produtos e Categorias</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.delete {
+            background-color: #dc3545;
+        }
+        button.delete:hover {
+            background-color: #c82333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .datetime {
+            font-size: 0.85em;
+            color: #666;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard - CRUD Produtos e Categorias</h1>
+    
+    <div id="message" class="message hidden"></div>
+
+    <!-- Seção de Categorias -->
+    <div class="section">
+        <h2>Categorias</h2>
+        
+        <!-- Formulário de Categoria -->
+        <div id="categoria-form">
+            <h3 id="categoria-form-title">Nova Categoria</h3>
+            <form id="form-categoria">
+                <input type="hidden" id="categoria-id">
+                <div class="form-group">
+                    <label for="categoria-nome">Nome:</label>
+                    <input type="text" id="categoria-nome" required maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="categoria-descricao">Descrição:</label>
+                    <textarea id="categoria-descricao" maxlength="200" rows="3"></textarea>
+                </div>
+                <button type="submit">Salvar</button>
+                <button type="button" onclick="cancelarCategoria()">Cancelar</button>
+            </form>
+        </div>
+
+        <!-- Lista de Categorias -->
+        <h3>Lista de Categorias</h3>
+        <table id="categorias-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Slug</th>
+                    <th>Imagem URL</th>
+                    <th>Criado em</th>
+                    <th>Atualizado em</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="8">Carregando...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Seção de Produtos -->
+    <div class="section">
+        <h2>Produtos</h2>
+        
+        <!-- Formulário de Produto -->
+        <div id="produto-form">
+            <h3 id="produto-form-title">Novo Produto</h3>
+            <form id="form-produto">
+                <input type="hidden" id="produto-id">
+                <div class="form-group">
+                    <label for="produto-nome">Nome:</label>
+                    <input type="text" id="produto-nome" required maxlength="120">
+                </div>
+                <div class="form-group">
+                    <label for="produto-descricao">Descrição:</label>
+                    <textarea id="produto-descricao" maxlength="300" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="produto-preco">Preço:</label>
+                    <input type="number" id="produto-preco" required min="0.01" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="produto-quantidade">Quantidade em Estoque:</label>
+                    <input type="number" id="produto-quantidade" required min="0">
+                </div>
+                <div class="form-group">
+                    <label for="produto-status">Status:</label>
+                    <select id="produto-status" required>
+                        <option value="ATIVO">ATIVO</option>
+                        <option value="INATIVO">INATIVO</option>
+                        <option value="EM_FALTA">EM_FALTA</option>
+                        <option value="DESCONTINUADO">DESCONTINUADO</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="produto-categoria">Categoria:</label>
+                    <select id="produto-categoria" required>
+                        <option value="">Selecione uma categoria</option>
+                    </select>
+                </div>
+                <button type="submit">Salvar</button>
+                <button type="button" onclick="cancelarProduto()">Cancelar</button>
+            </form>
+        </div>
+
+        <!-- Lista de Produtos -->
+        <h3>Lista de Produtos</h3>
+        <table id="produtos-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Preço</th>
+                    <th>Estoque</th>
+                    <th>Status</th>
+                    <th>Categoria</th>
+                    <th>Slug</th>
+                    <th>Imagem URL</th>
+                    <th>Criado em</th>
+                    <th>Atualizado em</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="12">Carregando...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        
+        // Funções utilitárias
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${type}`;
+            setTimeout(() => {
+                messageDiv.className = 'message hidden';
+            }, 5000);
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // Funções de Categoria
+        async function carregarCategorias() {
+            try {
+                const response = await fetch(`${API_BASE}/categorias`);
+                const categorias = await response.json();
+                
+                const tbody = document.querySelector('#categorias-table tbody');
+                tbody.innerHTML = categorias.map(categoria => `
+                    <tr>
+                        <td>${categoria.id}</td>
+                        <td>${categoria.nome}</td>
+                        <td>${categoria.descricao || ''}</td>
+                        <td>${categoria.slug || ''}</td>
+                        <td>${categoria.imageUrl || ''}</td>
+                        <td class="datetime">${formatDateTime(categoria.createdAt)}</td>
+                        <td class="datetime">${formatDateTime(categoria.updatedAt)}</td>
+                        <td class="actions">
+                            <button onclick="editarCategoria(${categoria.id})">Editar</button>
+                            <button class="delete" onclick="deletarCategoria(${categoria.id})">Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Atualizar select de categorias no formulário de produto
+                const select = document.getElementById('produto-categoria');
+                select.innerHTML = '<option value="">Selecione uma categoria</option>' +
+                    categorias.map(categoria => 
+                        `<option value="${categoria.id}">${categoria.nome}</option>`
+                    ).join('');
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+                showMessage('Erro ao carregar categorias', 'error');
+            }
+        }
+
+        async function salvarCategoria(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('categoria-id').value;
+            const categoria = {
+                nome: document.getElementById('categoria-nome').value,
+                descricao: document.getElementById('categoria-descricao').value
+            };
+
+            try {
+                const url = id ? `${API_BASE}/categorias/${id}` : `${API_BASE}/categorias`;
+                const method = id ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(categoria)
+                });
+
+                if (response.ok) {
+                    showMessage(`Categoria ${id ? 'atualizada' : 'criada'} com sucesso!`);
+                    cancelarCategoria();
+                    carregarCategorias();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.mensagem || 'Erro ao salvar categoria', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar categoria:', error);
+                showMessage('Erro ao salvar categoria', 'error');
+            }
+        }
+
+        async function editarCategoria(id) {
+            try {
+                const response = await fetch(`${API_BASE}/categorias/${id}`);
+                const categoria = await response.json();
+                
+                document.getElementById('categoria-id').value = categoria.id;
+                document.getElementById('categoria-nome').value = categoria.nome;
+                document.getElementById('categoria-descricao').value = categoria.descricao || '';
+                document.getElementById('categoria-form-title').textContent = 'Editar Categoria';
+                
+                document.getElementById('categoria-nome').focus();
+            } catch (error) {
+                console.error('Erro ao carregar categoria:', error);
+                showMessage('Erro ao carregar categoria', 'error');
+            }
+        }
+
+        async function deletarCategoria(id) {
+            if (!confirm('Tem certeza que deseja excluir esta categoria?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/categorias/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('Categoria excluída com sucesso!');
+                    carregarCategorias();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.mensagem || 'Erro ao excluir categoria', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao excluir categoria:', error);
+                showMessage('Erro ao excluir categoria', 'error');
+            }
+        }
+
+        function cancelarCategoria() {
+            document.getElementById('form-categoria').reset();
+            document.getElementById('categoria-id').value = '';
+            document.getElementById('categoria-form-title').textContent = 'Nova Categoria';
+        }
+
+        // Funções de Produto
+        async function carregarProdutos() {
+            try {
+                const response = await fetch(`${API_BASE}/produtos`);
+                const produtos = await response.json();
+                
+                const tbody = document.querySelector('#produtos-table tbody');
+                tbody.innerHTML = produtos.map(produto => `
+                    <tr>
+                        <td>${produto.id}</td>
+                        <td>${produto.nome}</td>
+                        <td>${produto.descricao || ''}</td>
+                        <td>${formatCurrency(produto.preco)}</td>
+                        <td>${produto.quantidadeEstoque}</td>
+                        <td>${produto.status}</td>
+                        <td>${produto.categoria ? produto.categoria.nome : ''}</td>
+                        <td>${produto.slug || ''}</td>
+                        <td>${produto.imageUrl || ''}</td>
+                        <td class="datetime">${formatDateTime(produto.createdAt)}</td>
+                        <td class="datetime">${formatDateTime(produto.updatedAt)}</td>
+                        <td class="actions">
+                            <button onclick="editarProduto(${produto.id})">Editar</button>
+                            <button class="delete" onclick="deletarProduto(${produto.id})">Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                showMessage('Erro ao carregar produtos', 'error');
+            }
+        }
+
+        async function salvarProduto(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('produto-id').value;
+            const produto = {
+                nome: document.getElementById('produto-nome').value,
+                descricao: document.getElementById('produto-descricao').value,
+                preco: parseFloat(document.getElementById('produto-preco').value),
+                quantidadeEstoque: parseInt(document.getElementById('produto-quantidade').value),
+                status: document.getElementById('produto-status').value,
+                categoriaId: parseInt(document.getElementById('produto-categoria').value)
+            };
+
+            try {
+                const url = id ? `${API_BASE}/produtos/${id}` : `${API_BASE}/produtos`;
+                const method = id ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(produto)
+                });
+
+                if (response.ok) {
+                    showMessage(`Produto ${id ? 'atualizado' : 'criado'} com sucesso!`);
+                    cancelarProduto();
+                    carregarProdutos();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.mensagem || 'Erro ao salvar produto', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar produto:', error);
+                showMessage('Erro ao salvar produto', 'error');
+            }
+        }
+
+        async function editarProduto(id) {
+            try {
+                const response = await fetch(`${API_BASE}/produtos/${id}`);
+                const produto = await response.json();
+                
+                document.getElementById('produto-id').value = produto.id;
+                document.getElementById('produto-nome').value = produto.nome;
+                document.getElementById('produto-descricao').value = produto.descricao || '';
+                document.getElementById('produto-preco').value = produto.preco;
+                document.getElementById('produto-quantidade').value = produto.quantidadeEstoque;
+                document.getElementById('produto-status').value = produto.status;
+                document.getElementById('produto-categoria').value = produto.categoria ? produto.categoria.id : '';
+                document.getElementById('produto-form-title').textContent = 'Editar Produto';
+                
+                document.getElementById('produto-nome').focus();
+            } catch (error) {
+                console.error('Erro ao carregar produto:', error);
+                showMessage('Erro ao carregar produto', 'error');
+            }
+        }
+
+        async function deletarProduto(id) {
+            if (!confirm('Tem certeza que deseja excluir este produto?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/produtos/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('Produto excluído com sucesso!');
+                    carregarProdutos();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.mensagem || 'Erro ao excluir produto', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao excluir produto:', error);
+                showMessage('Erro ao excluir produto', 'error');
+            }
+        }
+
+        function cancelarProduto() {
+            document.getElementById('form-produto').reset();
+            document.getElementById('produto-id').value = '';
+            document.getElementById('produto-form-title').textContent = 'Novo Produto';
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar dados iniciais
+            carregarCategorias();
+            carregarProdutos();
+
+            // Adicionar eventos aos formulários
+            document.getElementById('form-categoria').addEventListener('submit', salvarCategoria);
+            document.getElementById('form-produto').addEventListener('submit', salvarProduto);
+        });
+    </script>
+</body>
+</html>
