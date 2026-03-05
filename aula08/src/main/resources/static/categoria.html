@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Produtos por Categoria</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/">← Voltar</a>
+    </nav>
+    <h1>
+      Produtos da Categoria: <span id="categoria-nome">Carregando...</span>
+    </h1>
+    <div id="produtos">
+      <ul>
+        Carregando...
+      </ul>
+    </div>
+    <script>
+      const paramsString = window.location.search;
+      const searchParams = new URLSearchParams(paramsString);
+      const categoriaSlug = searchParams.get("slug");
+      console.log(categoriaSlug);
+      if (!categoriaSlug) {
+        document.getElementById("produtos").innerHTML =
+          "<p>Slug da categoria não especificado</p>";
+      } else {
+        // Buscar categoria pelo slug
+        fetch(`/api/categorias/slug/${categoriaSlug}`)
+          .then((response) => response.json())
+          .then((categoria) => {
+            document.getElementById("categoria-nome").textContent = categoria.nome;
+            
+            // Buscar produtos da categoria pelo ID
+            return fetch(`/api/categorias/${categoria.id}/produtos`);
+          })
+          .then((response) => response.json())
+          .then((produtos) => {
+            console.log("Produtos da categoria:", produtos);
+
+            const produtosList = document.getElementById("produtos");
+            const ul = produtosList.querySelector("ul");
+
+            if (produtos.length === 0) {
+              ul.innerHTML =
+                "<li>Nenhum produto encontrado nesta categoria.</li>";
+            } else {
+              ul.innerHTML = produtos
+                .map(
+                  (produto) => `
+                <li>
+                  <strong>${produto.nome}</strong><br>
+                  ${produto.descricao}<br>
+                  Preço: R$ ${produto.preco}<br>
+                  Estoque: ${produto.quantidadeEstoque}<br>
+                  Status: <small>${produto.status}</small><br>
+                  <a href="produto.html?slug=${produto.slug}">Ver detalhes</a>
+                </li>
+              `,
+                )
+                .join("");
+            }
+          })
+          .catch((error) => {
+            console.error("Erro ao carregar produtos:", error);
+            document.getElementById("produtos").innerHTML =
+              "<p>Erro ao carregar produtos.</p>";
+          });
+      }
+    </script>
+  </body>
+</html>

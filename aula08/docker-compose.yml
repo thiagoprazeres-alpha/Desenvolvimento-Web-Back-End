@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: aula03_postgres
+    environment:
+      POSTGRES_DB: produtosdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - aula03_network
+
+volumes:
+  postgres_data:
+
+networks:
+  aula03_network:
+    driver: bridge

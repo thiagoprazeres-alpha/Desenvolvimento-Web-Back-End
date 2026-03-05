@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Produtos</title>
+  </head>
+  <body>
+    <h1>Categorias</h1>
+    <nav id="categorias">
+      <ul>
+        Carregando...
+      </ul>
+    </nav>
+    <h1>Produtos</h1>
+    <div id="produtos">
+      <ul>Carregando...</ul>
+    </div>
+    <script>
+      // Carregar categorias
+      fetch("/api/categorias")
+        .then((response) => response.json())
+        .then((categorias) => {
+          console.log("Categorias received:", categorias);
+          const categoriasList = document.getElementById("categorias");
+          const ul = categoriasList.querySelector("ul");
+          ul.innerHTML = categorias
+            .map((categoria) => `<li><a href="categoria.html?slug=${categoria.slug}">${categoria.nome}</a></li>`)
+            .join("");
+        });
+
+      // Carregar produtos
+      fetch("/api/produtos")
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Data received:", data);
+          const produtos = document.getElementById("produtos");
+          const ul = produtos.querySelector("ul");
+          ul.innerHTML = data
+            .map((produto) => `
+              <li>
+                <strong>${produto.nome}</strong><br>
+                ${produto.descricao}<br>
+                Preço: R$ ${produto.preco}<br>
+                Estoque: ${produto.quantidadeEstoque}<br>
+                Status: <small>${produto.status}</small><br>
+                <a href="produto.html?slug=${produto.slug}">Ver detalhes</a>
+              </li>
+            `)
+            .join("");
+        });
+    </script>
+  </body>
+</html>
